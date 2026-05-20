@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>黎韵智启 · AI美育启蒙平台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "微软雅黑", sans-serif;
+            background: #f8f9fa;
+            font-size: 15px;
+            color: #333;
+            padding-bottom: 70px;
+        }
+        a { text-decoration: none; color: inherit; }
+
+        /* 顶部身份栏 */
+        .role-bar {
+            background: linear-gradient(90deg, #0B5F4F, #1A8C7A);
+            color: #fff;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .role-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: #fff;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            margin-left: 6px;
+            cursor: pointer;
+        }
+        .role-btn.active {
+            background: #fff;
+            color: #0B5F4F;
+            font-weight: bold;
+        }
+
+        /* 头部 */
+        .header {
+            background: linear-gradient(90deg, #0B5F4F, #1A8C7A);
+            color: #fff;
+            text-align: center;
+            padding: 14px;
+            font-size: 19px;
+            font-weight: bold;
+        }
+
+        /* 首页（全新无入口，纯内容） */
+        .home-banner {
+            background: linear-gradient(135deg, #0B5F4F, #1A8C7A);
+            color: #fff;
+            text-align: center;
+            padding: 50px 20px;
+            font-size: 24px;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+        }
+        .home-banner::after {
+            content: "";
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 50%;
+            top: -100px;
+            right: -100px;
+        }
+        .home-subtitle {
+            font-size: 16px;
+            margin-top: 12px;
+            opacity: 0.9;
+        }
+        .home-features {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px 15px;
+            gap: 12px;
+        }
+        .feature-card {
+            width: calc(50% - 6px);
+            background: #fff;
+            border-radius: 16px;
+            text-align: center;
+            padding: 20px 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+        .feature-icon {
+            font-size: 28px;
+            color: #0B5F4F;
+            margin-bottom: 8px;
+        }
+        .feature-text { font-size: 14px; color: #555; }
+        .content-box {
+            background: #fff;
+            margin: 0 15px 20px;
+            border-radius: 16px;
+            padding: 18px;
+            line-height: 1.7;
+            color: #555;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+        .content-box strong { color: #0B5F4F; font-size: 17px; }
+
+        /* 底部导航（唯一入口） */
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #fff;
+            display: flex;
+            border-top: 1px solid #eee;
+            padding: 8px 0;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+        }
+        .tab-item {
+            flex: 1;
+            text-align: center;
+            padding: 6px;
+            font-size: 12px;
+            color: #999;
+            cursor: pointer;
+        }
+        .tab-item.active { color: #0B5F4F; font-weight: bold; }
+        .tab-icon { font-size: 20px; margin-bottom: 2px; }
+
+        /* 页面切换 */
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* 列表项 */
+        .list-item {
+            background: #fff;
+            margin: 12px 15px;
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .list-item:active { transform: scale(0.98); }
+        .badge {
+            display: inline-block;
+            background: #e6f5f1;
+            color: #0B5F4F;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-right: 6px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #0B5F4F, #1A8C7A);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 7px 16px;
+            margin-top: 10px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .btn-teacher { background: linear-gradient(135deg, #1A8C7A, #2DA895); }
+
+        /* 详情页 */
+        .detail-page {
+            display: none;
+            padding: 15px;
+        }
+        .detail-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+        .back-btn {
+            color: #0B5F4F;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- 身份切换栏 -->
+    <div class="role-bar">
+        <span>当前身份：<span id="role-text">学生端</span></span>
+        <div>
+            <button class="role-btn active" id="student-role" onclick="switchRole('student')">学生端</button>
+            <button class="role-btn" id="teacher-role" onclick="switchRole('teacher')">教师端</button>
+        </div>
+    </div>
+
+    <!-- 首页：纯内容、无入口、不重复Tab -->
+    <div id="page-home" class="page active">
+        <div class="home-banner">
+            科技点亮黎韵，美育润泽童心
+            <div class="home-subtitle">AI赋能海南黎族文化 · 跨感官沉浸式美育平台</div>
+        </div>
+        <div class="home-features">
+            <div class="feature-card">
+                <div class="feature-icon">✨</div>
+                <div class="feature-text">AIGC数字化传承黎族非遗</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎧</div>
+                <div class="feature-text">跨感官沉浸式趣味体验</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📚</div>
+                <div class="feature-text">课标适配跨学科融合课程</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">👩‍🏫</div>
+                <div class="feature-text">教师零备课、常态化美育课堂</div>
+            </div>
+        </div>
+        <div class="content-box">
+            <strong>平台介绍</strong><br>
+            黎韵智启是国内首个AI赋能海南黎族文化跨感官沉浸式美育启蒙平台。首创“AIGC数字化+多模态感知+跨学科融合”模式，聚焦黎族非遗数字化保护与小学美育普惠推广，破解民族文化进校园“资源零散、形式单一、授课困难”痛点，让黎族文化在AI赋能下活态传承。
+        </div>
+    </div>
+
+    <!-- 素材库（唯一入口：底部Tab） -->
+    <div id="page-material" class="page">
+        <div class="header">AI黎族数字文化素材库</div>
+        <div class="list-item" onclick="openDetail('蛙纹黎锦', '黎锦纹样', '黎族生命力图腾纹样，AI高清数字化存档，传统与科技融合。')">
+            <span class="badge">黎锦纹样</span>
+            <strong>蛙纹黎锦</strong><br>
+            <small>黎族生命力图腾纹样，AI高清数字化存档</small>
+        </div>
+        <div class="list-item" onclick="openDetail('船形屋', '民俗场景', '黎族传统建筑素材，3D虚拟还原，感受古老居住智慧。')">
+            <span class="badge">民俗场景</span>
+            <strong>船形屋</strong><br>
+            <small>黎族传统建筑素材，3D虚拟还原</small>
+        </div>
+        <div class="list-item" onclick="openDetail('三月三歌谣', '黎语音频', '传统节庆歌谣，AI合成标准黎语，传承民族声音。')">
+            <span class="badge">黎语音频</span>
+            <strong>三月三歌谣</strong><br>
+            <small>传统节庆歌谣，AI合成标准黎语</small>
+        </div>
+    </div>
+
+    <!-- 体验包（唯一入口：底部Tab） -->
+    <div id="page-exp" class="page">
+        <div class="header" id="exp-header">跨感官沉浸式启蒙资源包</div>
+        <div class="list-item student-only" onclick="openDetail('动态黎锦纹样', '视觉体验', '视觉沉浸式纹样动画，色彩互动，感受黎锦之美。')">
+            <strong>动态黎锦纹样</strong><br>
+            <small>视觉沉浸式纹样动画，色彩互动</small><br>
+            <button class="btn">立即体验</button>
+        </div>
+        <div class="list-item student-only" onclick="openDetail('黎语故事音频', '听觉体验', 'AI合成黎语神话故事，双语字幕，听懂古老传说。')">
+            <strong>黎语故事音频</strong><br>
+            <small>AI合成黎语神话故事，双语字幕</small><br>
+            <button class="btn">立即体验</button>
+        </div>
+        <div class="list-item student-only" onclick="openDetail('三月三虚拟场景', '情景体验', '节庆情景互动体验，沉浸式参与黎族传统节日。')">
+            <strong>三月三虚拟场景</strong><br>
+            <small>节庆情景互动体验，沉浸式参与</small><br>
+            <button class="btn">立即体验</button>
+        </div>
+        <div class="list-item teacher-only" style="display:none;">
+            <strong>体验包资源管理</strong><br>
+            <small>新增/编辑/下架沉浸式资源</small><br>
+            <button class="btn btn-teacher">编辑资源</button>
+        </div>
+    </div>
+
+    <!-- 课程（唯一入口：底部Tab） -->
+    <div id="page-course" class="page">
+        <div class="header" id="course-header">跨学科融合教学课程群</div>
+        <div class="list-item student-only" onclick="openDetail('黎锦图案美术课', '低段1-2年级', '美术 | 纹样涂色+创意设计，培养审美感知力。')">
+            <span class="badge">低段1-2年级</span>
+            <strong>黎锦图案美术课</strong><br>
+            <small>美术 | 纹样涂色+创意设计</small>
+        </div>
+        <div class="list-item student-only" onclick="openDetail('黎语歌谣音乐课', '中段3-4年级', '音乐 | 歌谣传唱+节奏创编，感受民族韵律。')">
+            <span class="badge">中段3-4年级</span>
+            <strong>黎语歌谣音乐课</strong><br>
+            <small>音乐 | 歌谣传唱+节奏创编</small>
+        </div>
+        <div class="list-item student-only" onclick="openDetail('黎族文化探究课', '高段5-6年级', '语文/道法 | 非遗传承+文化思辨，树立文化自信。')">
+            <span class="badge">高段5-6年级</span>
+            <strong>黎族文化探究课</strong><br>
+            <small>语文/道法 | 非遗传承+文化思辨</small>
+        </div>
+        <div class="list-item teacher-only" style="display:none;">
+            <span class="badge">课标适配</span>
+            <strong>分学段标准化课件</strong><br>
+            <small>语文/美术/音乐/道法/劳动（1-6年级全覆盖）</small><br>
+            <button class="btn btn-teacher">下载教案</button>
+        </div>
+    </div>
+
+    <!-- 我的（唯一入口：底部Tab） -->
+    <div id="page-mine" class="page">
+        <div style="background:#fff;text-align:center;padding:30px;margin:15px;border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,0.06);">
+            <div style="width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,#cce8e0,#0B5F4F);margin:0 auto;"></div>
+            <div style="font-size:20px;margin-top:12px;font-weight:bold;" id="mine-name">学生用户</div>
+        </div>
+        <div style="background:#fff;margin:0 15px 20px;border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,0.06);">
+            <div class="list-item student-only" style="margin:0;padding:16px;border-bottom:1px solid #f5f5f5;">我的收藏</div>
+            <div class="list-item student-only" style="margin:0;padding:16px;border-bottom:1px solid #f5f5f5;">我的课程</div>
+            <div class="list-item student-only" style="margin:0;padding:16px;border-bottom:1px solid #f5f5f5;">作品上传与展示</div>
+            <div class="list-item student-only" style="margin:0;padding:16px;border-bottom:1px solid #f5f5f5;">学习记录</div>
+            <div class="list-item student-only" style="margin:0;padding:16px;">文化主题活动</div>
+            <div class="list-item teacher-only" style="display:none;margin:0;padding:16px;border-bottom:1px solid #f5f5f5;">教研培训记录</div>
+            <div class="list-item teacher-only" style="display:none;margin:0;padding:16px;border-bottom:1px solid #f5f5f5;">班级管理</div>
+            <div class="list-item teacher-only" style="display:none;margin:0;padding:16px;border-bottom:1px solid #f5f5f5;">教学数据统计</div>
+            <div class="list-item teacher-only" style="display:none;margin:0;padding:16px;">校本课程定制</div>
+        </div>
+    </div>
+
+    <!-- 详情页 -->
+    <div id="page-detail" class="detail-page">
+        <div class="back-btn" onclick="backPage()">← 返回</div>
+        <div class="detail-card">
+            <span class="badge" id="detail-badge"></span>
+            <h2 id="detail-title" style="margin:10px 0;"></h2>
+            <p id="detail-content" style="color:#555;line-height:1.7;"></p>
+            <button class="btn" style="margin-top:20px;width:100%;">立即体验/学习</button>
+        </div>
+    </div>
+
+    <!-- 底部导航（唯一入口，不重复首页） -->
+    <div class="tab-bar">
+        <div class="tab-item active" onclick="switchTab('home')">
+            <div class="tab-icon">🏠</div>首页
+        </div>
+        <div class="tab-item" onclick="switchTab('material')">
+            <div class="tab-icon">📚</div>素材库
+        </div>
+        <div class="tab-item" onclick="switchTab('exp')" id="exp-tab">
+            <div class="tab-icon">🎧</div>体验包
+        </div>
+        <div class="tab-item" onclick="switchTab('course')" id="course-tab">
+            <div class="tab-icon">🎓</div>课程
+        </div>
+        <div class="tab-item" onclick="switchTab('mine')">
+            <div class="tab-icon">👤</div>我的
+        </div>
+    </div>
+
+    <script>
+        let currentRole = 'student';
+        let lastPage = 'home';
+
+        // 切换身份
+        function switchRole(role) {
+            currentRole = role;
+            document.getElementById('student-role').classList.toggle('active', role === 'student');
+            document.getElementById('teacher-role').classList.toggle('active', role === 'teacher');
+            document.getElementById('role-text').innerText = role === 'student' ? '学生端' : '教师端';
+            document.getElementById('mine-name').innerText = role === 'student' ? '学生用户' : '教师用户';
+
+            document.querySelectorAll('.student-only').forEach(el => el.style.display = role === 'student' ? 'block' : 'none');
+            document.querySelectorAll('.teacher-only').forEach(el => el.style.display = role === 'teacher' ? 'block' : 'none');
+
+            document.getElementById('exp-header').innerText = role === 'student' ? '跨感官沉浸式启蒙资源包' : '体验包资源管理';
+            document.getElementById('course-header').innerText = role === 'student' ? '跨学科融合教学课程群' : '教学课程管理';
+            document.getElementById('exp-tab').innerText = role === 'student' ? '体验包' : '资源管理';
+            document.getElementById('course-tab').innerText = role === 'student' ? '课程' : '教学管理';
+        }
+
+        // 切换Tab（唯一入口）
+        function switchTab(page) {
+            lastPage = page;
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + page).classList.add('active');
+            document.getElementById('page-detail').style.display = 'none';
+
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            event.target.closest('.tab-item').classList.add('active');
+        }
+
+        // 打开详情页
+        function openDetail(title, badge, content) {
+            document.getElementById('page-' + lastPage).classList.remove('active');
+            document.getElementById('page-detail').style.display = 'block';
+            document.getElementById('detail-title').innerText = title;
+            document.getElementById('detail-badge').innerText = badge;
+            document.getElementById('detail-content').innerText = content;
+        }
+
+        // 返回上一页
+        function backPage() {
+            document.getElementById('page-detail').style.display = 'none';
+            document.getElementById('page-' + lastPage).classList.add('active');
+        }
+    </script>
+</body>
+</html>
